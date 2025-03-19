@@ -22,7 +22,7 @@ class SimpleCalculator(tk.Tk):
             ("7", 1, 0), ("8", 1, 1), ("9", 1, 2),
             ("4", 2, 0), ("5", 2, 1), ("6", 2, 2),
             ("1", 3, 0), ("2", 3, 1), ("3", 3, 2),
-            ("0", 4, 1)
+            ("0", 4, 1), (".", 4, 0)
         ]
 
         for (text, row, col) in buttons:
@@ -48,6 +48,9 @@ class SimpleCalculator(tk.Tk):
         clear_button = tk.Button(self, text="C", font=("Arial", 18), width=5, height=2, command=self.on_clear_click)
         clear_button.pack(pady=10)
 
+        # Настройка клавиш для работы с клавиатуры
+        self.bind("<Key>", self.on_key_press)
+
     def on_button_click(self, text):
         current = self.result_var.get()
         self.result_var.set(current + text)
@@ -67,6 +70,16 @@ class SimpleCalculator(tk.Tk):
 
     def on_clear_click(self):
         self.result_var.set("")
+
+    def on_key_press(self, event):
+        key = event.char
+        if key.isdigit() or key in "+-*/.":
+            self.on_button_click(key)
+        elif key == "\r":  # Enter key
+            self.on_equal_click()
+        elif key == "\x08":  # Backspace key
+            current = self.result_var.get()
+            self.result_var.set(current[:-1])
 
 if __name__ == "__main__":
     app = SimpleCalculator()
