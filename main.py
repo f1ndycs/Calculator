@@ -30,9 +30,43 @@ class SimpleCalculator(tk.Tk):
                                command=lambda t=text: self.on_button_click(t))
             button.grid(row=row, column=col, padx=5, pady=5)
 
+        # Кнопки операций
+        operations = [
+            ("+", 1, 3), ("-", 2, 3), ("*", 3, 3), ("/", 4, 3)
+        ]
+
+        for (text, row, col) in operations:
+            button = tk.Button(buttons_frame, text=text, font=("Arial", 18), width=5, height=2,
+                               command=lambda t=text: self.on_operation_click(t))
+            button.grid(row=row, column=col, padx=5, pady=5)
+
+        # Кнопка равенства
+        equal_button = tk.Button(self, text="=", font=("Arial", 18), width=5, height=2, command=self.on_equal_click)
+        equal_button.pack(pady=10)
+
+        # Кнопка сброса
+        clear_button = tk.Button(self, text="C", font=("Arial", 18), width=5, height=2, command=self.on_clear_click)
+        clear_button.pack(pady=10)
+
     def on_button_click(self, text):
         current = self.result_var.get()
         self.result_var.set(current + text)
+
+    def on_operation_click(self, operation):
+        current = self.result_var.get()
+        if current and current[-1] not in "+-*/":
+            self.result_var.set(current + operation)
+
+    def on_equal_click(self):
+        try:
+            current = self.result_var.get()
+            result = str(eval(current))  # Выполняем операцию
+            self.result_var.set(result)
+        except Exception as e:
+            self.result_var.set("Ошибка")
+
+    def on_clear_click(self):
+        self.result_var.set("")
 
 if __name__ == "__main__":
     app = SimpleCalculator()
