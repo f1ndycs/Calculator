@@ -1,11 +1,12 @@
 import tkinter as tk
 
+
 class SimpleCalculator(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("Простой калькулятор")
-        self.geometry("400x600")
+        self.geometry("400x700")  # Увеличиваем высоту окна
         self.create_widgets()
 
     def create_widgets(self):
@@ -13,6 +14,10 @@ class SimpleCalculator(tk.Tk):
         self.result_var = tk.StringVar()
         entry = tk.Entry(self, textvariable=self.result_var, font=("Arial", 24), bd=10, relief="ridge")
         entry.pack(pady=20, fill="x")
+
+        # История вычислений
+        self.history_listbox = tk.Listbox(self, height=5, font=("Arial", 14), bd=5, relief="ridge")
+        self.history_listbox.pack(pady=10, fill="x")
 
         # Кнопки чисел
         buttons_frame = tk.Frame(self)
@@ -40,19 +45,28 @@ class SimpleCalculator(tk.Tk):
                                command=lambda t=text: self.on_operation_click(t))
             button.grid(row=row, column=col, padx=5, pady=5)
 
-        # Кнопка равенства
-        equal_button = tk.Button(self, text="=", font=("Arial", 18), width=5, height=2, command=self.on_equal_click)
-        equal_button.pack(pady=10)
+        # Кнопки "=" и "C" в одной строке
+        equal_clear_frame = tk.Frame(self)
+        equal_clear_frame.pack(pady=10)
 
-        # Кнопка сброса
-        clear_button = tk.Button(self, text="C", font=("Arial", 18), width=5, height=2, command=self.on_clear_click)
-        clear_button.pack(pady=10)
+        equal_button = tk.Button(equal_clear_frame, text="=", font=("Arial", 18), width=5, height=2,
+                                 command=self.on_equal_click)
+        equal_button.grid(row=0, column=0, padx=5, pady=5)
+
+        clear_button = tk.Button(equal_clear_frame, text="C", font=("Arial", 18), width=5, height=2,
+                                 command=self.on_clear_click)
+        clear_button.grid(row=0, column=1, padx=5, pady=5)
 
         # Настройка клавиш для работы с клавиатуры
         self.bind("<Key>", self.on_key_press)
 
     def on_button_click(self, text):
         current = self.result_var.get()
+
+        # Проверка на дублирование цифр
+        if text.isdigit() and current.endswith(text):
+            return
+
         self.result_var.set(current + text)
 
     def on_operation_click(self, operation):
@@ -65,6 +79,10 @@ class SimpleCalculator(tk.Tk):
             current = self.result_var.get()
             result = str(eval(current))  # Выполняем операцию
             self.result_var.set(result)
+
+            # Добавляем в историю
+            self.history_listbox.insert(tk.END, f"{current} = {result}")
+            self.history_listbox.yview(tk.END)  # Прокручиваем к последнему элементу истории
         except Exception as e:
             self.result_var.set("Ошибка")
 
@@ -73,13 +91,24 @@ class SimpleCalculator(tk.Tk):
 
     def on_key_press(self, event):
         key = event.char
+        current = self.result_var.get()
+
+        # Проверка на дублирование операторов
+        if key in "+-*/" and (current and current[-1] in "+-*/"):
+            return
+
+        # Проверка на дублирование цифр
+        if key.isdigit() and current.endswith(key):
+            return
+
+        # Добавляем только цифры и допустимые символы
         if key.isdigit() or key in "+-*/.":
             self.on_button_click(key)
         elif key == "\r":  # Enter key
             self.on_equal_click()
         elif key == "\x08":  # Backspace key
-            current = self.result_var.get()
             self.result_var.set(current[:-1])
+
 
 if __name__ == "__main__":
     app = SimpleCalculator()
