@@ -65,29 +65,48 @@ class CalculatorUI(tk.Tk):
         self.bind("<Key>", self.on_key_press)
 
     def on_button_click(self, text):
-        if self.calculator.result == "Ошибка":
-            self.calculator.clear()
-        self.calculator.add(text)
-        self.result_var.set(self.calculator.result)
+        current = self.result_var.get()
+
+        # Если после вычисления или ошибки вводим новую цифру
+        if current == "Ошибка" or current == "0":
+            self.result_var.set(text)  # Сбрасываем строку и начинаем с нового числа
+            return
+
+        # Проверка на дублирование цифр
+        if text.isdigit() and current.endswith(text):
+            return
+
+        self.result_var.set(current + text)
 
     def on_operation_click(self, operation):
-        # Если уже есть результат, заменяем на результат, а не старое выражение
-        current = self.calculator.result
+        current = self.result_var.get()
+
+        # Если после вычисления пытаемся добавить операцию, не добавляем
+        if current == "Ошибка" or current == "0":
+            return  # Не добавляем операцию после результата или ошибки
+
         if current and current[-1] not in "+-*/":
-            self.calculator.add(operation)
-            self.result_var.set(self.calculator.result)
+            self.result_var.set(current + operation)
 
     def on_equal_click(self):
-        result = self.calculator.evaluate()
-        self.result_var.set(result)
+        current = self.result_var.get()
 
-        # Добавляем в историю
-        self.history_listbox.insert(tk.END, f"{self.calculator.result} = {result}")
-        self.history_listbox.yview(tk.END)  # Прокручиваем к последнему элементу истории
+        # Если строка пуста или ошибка, ничего не делаем
+        if current == "" or current == "Ошибка":
+            return
+
+        try:
+            result = str(eval(current))  # Выполняем операцию
+            self.result_var.set(result)
+
+            # Добавляем в историю
+            self.history_listbox.insert(tk.END, f"{current} = {result}")
+            self.history_listbox.yview(tk.END)  # Прокручиваем к последнему элементу истории
+        except Exception as e:
+            self.result_var.set("Ошибка")  # Если ошибка, выводим сообщение
 
     def on_clear_click(self):
-        self.calculator.clear()
-        self.result_var.set("")
+        self.result_var.set("")  # Очищаем строку
 
     def on_clear_history_click(self):
         # Очистка истории
@@ -95,10 +114,20 @@ class CalculatorUI(tk.Tk):
 
     def on_key_press(self, event):
         key = event.char
+        current = self.result_var.get()
+
+        # Проверка на дублирование операторов
+        if key in "+-*/" and (current and current[-1] in "+-*/"):
+            return
+
+        # Проверка на дублирование цифр
+        if key.isdigit() and current.endswith(key):
+            return
+
+        # Добавляем только цифры и допустимые символы
         if key.isdigit() or key in "+-*/.":
             self.on_button_click(key)
         elif key == "\r":  # Enter key
             self.on_equal_click()
         elif key == "\x08":  # Backspace key
-            self.calculator.result = self.calculator.result[:-1]
-            self.result_var.set(self.calculator.result)
+            self.result_var.set(current[:-1])  # Удаляем последний символ
