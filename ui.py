@@ -5,7 +5,7 @@ class CalculatorUI(tk.Tk):
         super().__init__()
         self.calculator = calculator
         self.title("Простой калькулятор")
-        self.geometry("400x700")  # Увеличиваем высоту окна
+        self.geometry("400x750")  # Увеличиваем высоту окна для добавления кнопки очистки истории
         self.create_widgets()
 
     def create_widgets(self):
@@ -56,16 +56,26 @@ class CalculatorUI(tk.Tk):
                                  command=self.on_clear_click)
         clear_button.grid(row=0, column=1, padx=5, pady=5)
 
+        # Кнопка очистки истории
+        clear_history_button = tk.Button(self, text="Очистить историю", font=("Arial", 14), width=20, height=2,
+                                         command=self.on_clear_history_click)
+        clear_history_button.pack(pady=10)
+
         # Настройка клавиш для работы с клавиатуры
         self.bind("<Key>", self.on_key_press)
 
     def on_button_click(self, text):
+        if self.calculator.result == "Ошибка":
+            self.calculator.clear()
         self.calculator.add(text)
         self.result_var.set(self.calculator.result)
 
     def on_operation_click(self, operation):
-        self.calculator.add(operation)
-        self.result_var.set(self.calculator.result)
+        # Если уже есть результат, заменяем на результат, а не старое выражение
+        current = self.calculator.result
+        if current and current[-1] not in "+-*/":
+            self.calculator.add(operation)
+            self.result_var.set(self.calculator.result)
 
     def on_equal_click(self):
         result = self.calculator.evaluate()
@@ -78,6 +88,10 @@ class CalculatorUI(tk.Tk):
     def on_clear_click(self):
         self.calculator.clear()
         self.result_var.set("")
+
+    def on_clear_history_click(self):
+        # Очистка истории
+        self.history_listbox.delete(0, tk.END)
 
     def on_key_press(self, event):
         key = event.char
