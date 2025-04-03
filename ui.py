@@ -1,4 +1,5 @@
 import tkinter as tk
+from calculator_factory import CalculatorButtonFactory
 
 class CalculatorUI(tk.Tk):
     def __init__(self, calculator):
@@ -30,8 +31,8 @@ class CalculatorUI(tk.Tk):
         ]
 
         for (text, row, col) in buttons:
-            button = tk.Button(buttons_frame, text=text, font=("Arial", 18), width=5, height=2,
-                               command=lambda t=text: self.on_button_click(t))
+            button = CalculatorButtonFactory.create_button(buttons_frame, text, row, col,
+                                                           command=lambda t=text: self.on_button_click(t))
             button.grid(row=row, column=col, padx=5, pady=5)
 
         # Кнопки операций
@@ -40,25 +41,23 @@ class CalculatorUI(tk.Tk):
         ]
 
         for (text, row, col) in operations:
-            button = tk.Button(buttons_frame, text=text, font=("Arial", 18), width=5, height=2,
-                               command=lambda t=text: self.on_operation_click(t))
+            button = CalculatorButtonFactory.create_button(buttons_frame, text, row, col,
+                                                           command=lambda t=text: self.on_operation_click(t))
             button.grid(row=row, column=col, padx=5, pady=5)
 
         # Кнопки "=" и "C" в одной строке
         equal_clear_frame = tk.Frame(self)
         equal_clear_frame.pack(pady=10)
 
-        equal_button = tk.Button(equal_clear_frame, text="=", font=("Arial", 18), width=5, height=2,
-                                 command=self.on_equal_click)
+        equal_button = CalculatorButtonFactory.create_button(equal_clear_frame, "=", 0, 0, command=self.on_equal_click)
         equal_button.grid(row=0, column=0, padx=5, pady=5)
 
-        clear_button = tk.Button(equal_clear_frame, text="C", font=("Arial", 18), width=5, height=2,
-                                 command=self.on_clear_click)
+        clear_button = CalculatorButtonFactory.create_button(equal_clear_frame, "C", 0, 1, command=self.on_clear_click)
         clear_button.grid(row=0, column=1, padx=5, pady=5)
 
         # Кнопка очистки истории
-        clear_history_button = tk.Button(self, text="Очистить историю", font=("Arial", 14), width=20, height=2,
-                                         command=self.on_clear_history_click)
+        clear_history_button = CalculatorButtonFactory.create_button(self, "Очистить историю", 0, 0, width=20,
+                                                                     command=self.on_clear_history_click)
         clear_history_button.pack(pady=10)
 
         # Настройка клавиш для работы с клавиатуры
