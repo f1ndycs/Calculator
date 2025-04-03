@@ -1,5 +1,5 @@
 import tkinter as tk
-from calculator import SimpleCalculator
+from calculator_factory import CalculatorFactory
 
 class SimpleCalculatorApp(tk.Tk):
     def __init__(self):
@@ -60,8 +60,8 @@ class SimpleCalculatorApp(tk.Tk):
         # Настройка клавиш для работы с клавиатуры
         self.bind("<Key>", self.on_key_press)
 
-        # Инициализация калькулятора
-        self.calculator = SimpleCalculator(self.result_var, self.history_listbox)
+        # Инициализация калькулятора через фабрику
+        self.calculator = CalculatorFactory.create_calculator(self.result_var, self.history_listbox)
 
     def on_button_click(self, text):
         self.calculator.on_button_click(text)
