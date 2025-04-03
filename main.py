@@ -1,5 +1,5 @@
-from ui import SimpleCalculatorApp
+from simple_calculator import SimpleCalculator
 
 if __name__ == "__main__":
-    app = SimpleCalculatorApp()
-    app.mainloop()
+    app = SimpleCalculator()
+    app.run()

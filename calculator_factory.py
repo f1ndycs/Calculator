@@ -1,7 +1,6 @@
-from simple_calculator import SimpleCalculator
+from tkinter import Button
 
-class CalculatorFactory:
+class CalculatorButtonFactory:
     @staticmethod
-    def create_calculator(result_var, history_listbox):
-        # Тут можно добавить логику для выбора типа калькулятора (если нужно)
-        return SimpleCalculator(result_var, history_listbox)
+    def create_button(master, text, row, col, width=5, height=2, command=None):
+        return Button(master, text=text, font=("Arial", 18), width=width, height=height, command=command)

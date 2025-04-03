@@ -1,10 +1,9 @@
 import tkinter as tk
-from calculator_factory import CalculatorFactory
 
-class SimpleCalculatorApp(tk.Tk):
-    def __init__(self):
+class CalculatorUI(tk.Tk):
+    def __init__(self, calculator):
         super().__init__()
-
+        self.calculator = calculator
         self.title("Простой калькулятор")
         self.geometry("400x700")  # Увеличиваем высоту окна
         self.create_widgets()
@@ -60,20 +59,32 @@ class SimpleCalculatorApp(tk.Tk):
         # Настройка клавиш для работы с клавиатуры
         self.bind("<Key>", self.on_key_press)
 
-        # Инициализация калькулятора через фабрику
-        self.calculator = CalculatorFactory.create_calculator(self.result_var, self.history_listbox)
-
     def on_button_click(self, text):
-        self.calculator.on_button_click(text)
+        self.calculator.add(text)
+        self.result_var.set(self.calculator.result)
 
     def on_operation_click(self, operation):
-        self.calculator.on_operation_click(operation)
+        self.calculator.add(operation)
+        self.result_var.set(self.calculator.result)
 
     def on_equal_click(self):
-        self.calculator.on_equal_click()
+        result = self.calculator.evaluate()
+        self.result_var.set(result)
+
+        # Добавляем в историю
+        self.history_listbox.insert(tk.END, f"{self.calculator.result} = {result}")
+        self.history_listbox.yview(tk.END)  # Прокручиваем к последнему элементу истории
 
     def on_clear_click(self):
-        self.calculator.on_clear_click()
+        self.calculator.clear()
+        self.result_var.set("")
 
     def on_key_press(self, event):
-        self.calculator.on_key_press(event)
+        key = event.char
+        if key.isdigit() or key in "+-*/.":
+            self.on_button_click(key)
+        elif key == "\r":  # Enter key
+            self.on_equal_click()
+        elif key == "\x08":  # Backspace key
+            self.calculator.result = self.calculator.result[:-1]
+            self.result_var.set(self.calculator.result)

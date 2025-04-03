@@ -1,22 +1,15 @@
-from abc import ABC, abstractmethod
+class Calculator:
+    def __init__(self):
+        self.result = ""
 
-class Calculator(ABC):
-    @abstractmethod
-    def on_button_click(self, text):
-        pass
+    def add(self, value):
+        self.result += value
 
-    @abstractmethod
-    def on_operation_click(self, operation):
-        pass
+    def evaluate(self):
+        try:
+            return str(eval(self.result))  # Внимание на использование eval
+        except Exception:
+            return "Ошибка"
 
-    @abstractmethod
-    def on_equal_click(self):
-        pass
-
-    @abstractmethod
-    def on_clear_click(self):
-        pass
-
-    @abstractmethod
-    def on_key_press(self, event):
-        pass
+    def clear(self):
+        self.result = ""
