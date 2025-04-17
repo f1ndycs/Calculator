@@ -6,27 +6,33 @@ class CalculatorViewModel:
         self.result = ""
 
     def on_button_click(self, text):
-        current = self.result
-        if current == "Ошибка" or current == "0":
+        if self.result == "Ошибка" or self.result == "0":
             self.result = text
+        elif text.isdigit() and self.result.endswith(text):
+            pass  # предотвращаем повтор одной и той же цифры
         else:
-            self.result = current + text
+            self.result += text
 
-    def on_operation_click(self, operation):
-        current = self.result
-        if current == "Ошибка" or current == "0":
+    def on_operation_click(self, op):
+        if not self.result or self.result in ["Ошибка", "0"]:
             return
-        if current and current[-1] not in "+-*/":
-            self.result = current + operation
+        if self.result[-1] not in "+-*/":
+            self.result += op
 
     def on_equal_click(self):
-        current = self.result
-        if current == "" or current == "Ошибка":
-            return
+        if not self.result or self.result == "Ошибка":
+            return None, None
         try:
-            self.result = str(eval(current))  # Выполняем операцию
-        except Exception as e:
+            expression = self.result
+            self.result = str(eval(self.result))
+            return expression, self.result
+        except:
             self.result = "Ошибка"
+            return expression, "Ошибка"
 
     def on_clear_click(self):
         self.result = ""
+
+    def on_backspace(self):
+        if self.result and self.result != "Ошибка":
+            self.result = self.result[:-1]
