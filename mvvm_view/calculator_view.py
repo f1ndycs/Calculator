@@ -1,6 +1,6 @@
 import tkinter as tk
 from mvvm_viewmodel.calculator_viewmodel import CalculatorViewModel
-from calculator_factory import CalculatorButtonFactory
+from mvvm_model.calculator_factory import CalculatorButtonFactory
 
 class CalculatorUI(tk.Tk):
     def __init__(self, viewmodel: CalculatorViewModel):
