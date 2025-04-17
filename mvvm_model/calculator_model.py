@@ -7,7 +7,7 @@ class Calculator:
 
     def evaluate(self):
         try:
-            return str(eval(self.result))  # Внимание на использование eval
+            return str(eval(self.result))
         except Exception:
             return "Ошибка"
 

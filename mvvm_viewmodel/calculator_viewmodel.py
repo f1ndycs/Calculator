@@ -1,33 +1,32 @@
+from mvvm_model.calculator_model import Calculator
+
 class CalculatorViewModel:
-    def __init__(self, model):
-        self.model = model
-        self.result_observer = None
-        self.history = []
+    def __init__(self):
+        self.calculator = Calculator()
+        self.result = ""
 
-    def set_observer(self, callback):
-        """Позволяет UI подписаться на изменения результата"""
-        self.result_observer = callback
+    def on_button_click(self, text):
+        current = self.result
+        if current == "Ошибка" or current == "0":
+            self.result = text
+        else:
+            self.result = current + text
 
-    def add_input(self, value):
-        self.model.add(value)
-        self._notify()
+    def on_operation_click(self, operation):
+        current = self.result
+        if current == "Ошибка" or current == "0":
+            return
+        if current and current[-1] not in "+-*/":
+            self.result = current + operation
 
-    def calculate(self):
-        result = self.model.evaluate()
-        self.history.append(f"{self.model.result} = {result}")
-        self.model.result = result  # Заменяем текущую строку результатом
-        self._notify()
+    def on_equal_click(self):
+        current = self.result
+        if current == "" or current == "Ошибка":
+            return
+        try:
+            self.result = str(eval(current))  # Выполняем операцию
+        except Exception as e:
+            self.result = "Ошибка"
 
-    def clear(self):
-        self.model.clear()
-        self._notify()
-
-    def get_history(self):
-        return self.history
-
-    def clear_history(self):
-        self.history.clear()
-
-    def _notify(self):
-        if self.result_observer:
-            self.result_observer(self.model.result)
+    def on_clear_click(self):
+        self.result = ""
