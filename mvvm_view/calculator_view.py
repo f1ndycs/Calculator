@@ -70,9 +70,18 @@ class CalculatorUI(tk.Tk):
         self.result_var.set(self.viewmodel.result)
 
     def on_operation_click(self, operation):
-        # Взаимодействуем с ViewModel
-        self.viewmodel.on_operation_click(operation)
-        self.result_var.set(self.viewmodel.result)
+        current = self.result_var.get()
+
+        # Если после вычисления пытаемся добавить операцию, не добавляем
+        if current == "Ошибка" or current == "0":
+            return  # Не добавляем операцию после результата или ошибки
+
+        # Если строка содержит только число (например, после вычисления), заменяем её
+        if current.isdigit() or (current.replace('.', '', 1).isdigit() and current.count('.') < 2):
+            self.result_var.set(current + operation)
+        else:
+            if current and current[-1] not in "+-*/":
+                self.result_var.set(current + operation)
 
     def on_equal_click(self):
         current = self.result_var.get()
