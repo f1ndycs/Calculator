@@ -65,23 +65,32 @@ class CalculatorUI(tk.Tk):
         self.bind("<Key>", self.on_key_press)
 
     def on_button_click(self, text):
-        # Взаимодействуем с ViewModel
-        self.viewmodel.on_button_click(text)
-        self.result_var.set(self.viewmodel.result)
+        current = self.result_var.get()
+
+        # Если после вычисления или ошибки вводим новую цифру
+        if current == "Ошибка" or current == "0":
+            self.result_var.set(text)  # Сбрасываем строку и начинаем с нового числа
+            return
+
+        # Проверка на дублирование цифр
+        if text.isdigit() and current.endswith(text):
+            return
+
+        self.result_var.set(current + text)
 
     def on_operation_click(self, operation):
         current = self.result_var.get()
 
-        # Если после вычисления пытаемся добавить операцию, не добавляем
+        # Если строка пуста или ошибка, ничего не делаем
         if current == "Ошибка" or current == "0":
-            return  # Не добавляем операцию после результата или ошибки
+            return
 
-        # Если строка содержит только число (например, после вычисления), заменяем её
-        if current.isdigit() or (current.replace('.', '', 1).isdigit() and current.count('.') < 2):
-            self.result_var.set(current + operation)
-        else:
-            if current and current[-1] not in "+-*/":
-                self.result_var.set(current + operation)
+        # Если текущая строка заканчивается числом или с плавающей точкой
+        if current[-1].isdigit() or (current[-1] == "." and current.count(".") < 2):
+            self.result_var.set(current + operation)  # Добавляем оператор
+        # Если строка заканчивается на операцию, ничего не делаем
+        elif current[-1] in "+-*/":
+            return
 
     def on_equal_click(self):
         current = self.result_var.get()
