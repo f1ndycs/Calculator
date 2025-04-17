@@ -1,5 +1,5 @@
-from ui import CalculatorUI
-from calculator import Calculator
+from mvvm_view.calculator_view import CalculatorUI
+from mvvm_model.calculator import Calculator
 
 class SimpleCalculator:
     def __init__(self):
