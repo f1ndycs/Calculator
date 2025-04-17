@@ -75,14 +75,21 @@ class CalculatorUI(tk.Tk):
         self.result_var.set(self.viewmodel.result)
 
     def on_equal_click(self):
-        # Взаимодействуем с ViewModel
-        self.viewmodel.on_equal_click()
-        self.result_var.set(self.viewmodel.result)
+        current = self.result_var.get()
 
-        # Добавляем в историю
-        if self.viewmodel.result != "Ошибка":
-            self.history_listbox.insert(tk.END, f"{self.viewmodel.result}")
+        # Если строка пуста или ошибка, ничего не делаем
+        if current == "" or current == "Ошибка":
+            return
+
+        try:
+            result = str(eval(current))  # Выполняем операцию
+            self.result_var.set(result)
+
+            # Добавляем полное действие в историю, а не только результат
+            self.history_listbox.insert(tk.END, f"{current} = {result}")
             self.history_listbox.yview(tk.END)  # Прокручиваем к последнему элементу истории
+        except Exception as e:
+            self.result_var.set("Ошибка")  # Если ошибка, выводим сообщение
 
     def on_clear_click(self):
         # Взаимодействуем с ViewModel
