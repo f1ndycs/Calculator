@@ -5,20 +5,22 @@ from calculator_factory import CalculatorButtonFactory
 class CalculatorUI(tk.Tk):
     def __init__(self, viewmodel: CalculatorViewModel):
         super().__init__()
-        self.viewmodel = viewmodel
-        self.viewmodel.set_observer(self.update_result)
-        self.title("Простой калькулятор (MVVM)")
+        self.viewmodel = viewmodel  # Принимаем ViewModel
+        self.title("Простой калькулятор")
         self.geometry("400x750")
         self.create_widgets()
 
     def create_widgets(self):
+        # Поле вывода
         self.result_var = tk.StringVar()
         entry = tk.Entry(self, textvariable=self.result_var, font=("Arial", 24), bd=10, relief="ridge")
         entry.pack(pady=20, fill="x")
 
+        # История вычислений
         self.history_listbox = tk.Listbox(self, height=5, font=("Arial", 14), bd=5, relief="ridge")
         self.history_listbox.pack(pady=10, fill="x")
 
+        # Кнопки чисел
         buttons_frame = tk.Frame(self)
         buttons_frame.pack()
 
@@ -31,15 +33,20 @@ class CalculatorUI(tk.Tk):
 
         for (text, row, col) in buttons:
             button = CalculatorButtonFactory.create_button(buttons_frame, text, row, col,
-                                                           command=lambda t=text: self.viewmodel.add_input(t))
+                                                           command=lambda t=text: self.on_button_click(t))
             button.grid(row=row, column=col, padx=5, pady=5)
 
-        operations = [("+", 1, 3), ("-", 2, 3), ("*", 3, 3), ("/", 4, 3)]
+        # Кнопки операций
+        operations = [
+            ("+", 1, 3), ("-", 2, 3), ("*", 3, 3), ("/", 4, 3)
+        ]
+
         for (text, row, col) in operations:
             button = CalculatorButtonFactory.create_button(buttons_frame, text, row, col,
-                                                           command=lambda t=text: self.viewmodel.add_input(t))
+                                                           command=lambda t=text: self.on_operation_click(t))
             button.grid(row=row, column=col, padx=5, pady=5)
 
+        # Кнопки "=" и "C" в одной строке
         equal_clear_frame = tk.Frame(self)
         equal_clear_frame.pack(pady=10)
 
@@ -49,33 +56,60 @@ class CalculatorUI(tk.Tk):
         clear_button = CalculatorButtonFactory.create_button(equal_clear_frame, "C", 0, 1, command=self.on_clear_click)
         clear_button.grid(row=0, column=1, padx=5, pady=5)
 
+        # Кнопка очистки истории
         clear_history_button = CalculatorButtonFactory.create_button(self, "Очистить историю", 0, 0, width=20,
                                                                      command=self.on_clear_history_click)
         clear_history_button.pack(pady=10)
 
+        # Настройка клавиш для работы с клавиатуры
         self.bind("<Key>", self.on_key_press)
 
-    def update_result(self, new_result):
-        self.result_var.set(new_result)
+    def on_button_click(self, text):
+        # Взаимодействуем с ViewModel
+        self.viewmodel.on_button_click(text)
+        self.result_var.set(self.viewmodel.result)
+
+    def on_operation_click(self, operation):
+        # Взаимодействуем с ViewModel
+        self.viewmodel.on_operation_click(operation)
+        self.result_var.set(self.viewmodel.result)
 
     def on_equal_click(self):
-        self.viewmodel.calculate()
-        self.history_listbox.insert(tk.END, self.viewmodel.get_history()[-1])
-        self.history_listbox.yview(tk.END)
+        # Взаимодействуем с ViewModel
+        self.viewmodel.on_equal_click()
+        self.result_var.set(self.viewmodel.result)
+
+        # Добавляем в историю
+        if self.viewmodel.result != "Ошибка":
+            self.history_listbox.insert(tk.END, f"{self.viewmodel.result}")
+            self.history_listbox.yview(tk.END)  # Прокручиваем к последнему элементу истории
 
     def on_clear_click(self):
-        self.viewmodel.clear()
+        # Взаимодействуем с ViewModel
+        self.viewmodel.on_clear_click()
+        self.result_var.set(self.viewmodel.result)
 
     def on_clear_history_click(self):
-        self.viewmodel.clear_history()
+        # Очистка истории
         self.history_listbox.delete(0, tk.END)
 
     def on_key_press(self, event):
         key = event.char
+        current = self.viewmodel.result
+
+        # Проверка на дублирование операторов
+        if key in "+-*/" and (current and current[-1] in "+-*/"):
+            return
+
+        # Проверка на дублирование цифр
+        if key.isdigit() and current.endswith(key):
+            return
+
+        # Добавляем только цифры и допустимые символы
         if key.isdigit() or key in "+-*/.":
-            self.viewmodel.add_input(key)
-        elif key == "\r":
+            self.on_button_click(key)
+        elif key == "\r":  # Enter key
             self.on_equal_click()
-        elif key == "\x08":
-            current = self.result_var.get()
-            self.result_var.set(current[:-1])
+        elif key == "\x08":  # Backspace key
+            self.viewmodel.result = current[:-1]  # Удаляем последний символ
+            self.result_var.set(self.viewmodel.result)
